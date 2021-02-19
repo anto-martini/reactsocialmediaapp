@@ -1,17 +1,43 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
+const { SECRET_KEY } = require('../../config.js');
+const { UserInputError } = require('apollo-server');
+
+
+function generateToken(user) {
+    return jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      },
+      SECRET_KEY,
+      { expiresIn: '1h' }
+    );
+  }
+
 
 module.exports = {
     Mutation: {
-        register(
+         async register(
             parent,
-            { registeInput: { username, email, password, confirmPassword } },
+            {
+                registerInput: { username, email, password, confirmPassword }
+              } ,
             context,
             info) {
 
             // TODO validate user data
             // TODO: make sure user doesnt already exist
+            const user = await User.findOne({username});
+            if(user){
+                throw new UserInputError('Username is taken', {
+                    errors: {
+                        username: 'This username is taken'
+                    }
+                })
+            }
             // TODO : hash password and create an auth token
             password: await bcrypt.hash(password,12);
             const newUser = new User({
@@ -23,11 +49,13 @@ module.exports = {
             
             const res = await newUser.save();
 
-            const token = jwt.sign({
-                id: res.id,
-                email: res.email,
-                username: res.username
-            })
+            const token = generateToken(res);
+
+            return {
+                ...res._doc,
+                id: res._id,
+                token
+            }
         }
     }
 }

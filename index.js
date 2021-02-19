@@ -17,7 +17,7 @@ server.listen({ port: 5000 }).then((res) => {
 
 
 const mongoose = require('mongoose');
-const uri = `mongodb+srv://admin:A0ZLkQCmIJtayVbv@cluster0.uzm9f.mongodb.net/socialmediaapp?retryWrites=true&w=majority`;
+const uri = 'mongodb+srv://admin:7lhfqHTiWlZnNiRp@cluster0.uzm9f.mongodb.net/socialmediaapp?retryWrites=true'
 
 async function conectar() {
     try {
