@@ -1,6 +1,7 @@
-const { ApolloServer } = require('apollo-server');
+const { ApolloServer, PubSub } = require('apollo-server');
 const gql = require('graphql-tag');
 
+const pubsub = new PubSub();
 
 const typeDefs = require('./graphql/typeDefs');
 
@@ -8,7 +9,8 @@ const resolvers = require('./graphql/resolvers');
 
 const server = new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    context: ({ req }) => ({ req, pubsub })
 })
 
 server.listen({ port: 5000 }).then((res) => {
@@ -17,11 +19,11 @@ server.listen({ port: 5000 }).then((res) => {
 
 
 const mongoose = require('mongoose');
-const uri = 'mongodb+srv://admin:7lhfqHTiWlZnNiRp@cluster0.uzm9f.mongodb.net/socialmediaapp?retryWrites=true'
+const { MONGODB } = require('./config');
 
 async function conectar() {
     try {
-        await mongoose.connect(uri, {
+        await mongoose.connect(MONGODB, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true,
